@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "252577509112",
+    "project_id": "ornamen-7bf19",
+    "storage_bucket": "ornamen-7bf19.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252577509112:android:64b53a4881c99a3a8e550d",
+        "android_client_info": {
+          "package_name": "com.ornamen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "252577509112-m62o44eonfi53ae88r1ghsa259d7mddn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5gz6u9SRaA-j9K8UlV_b4Lmz5MaTNcq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "252577509112-m62o44eonfi53ae88r1ghsa259d7mddn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
