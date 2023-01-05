@@ -27,6 +27,7 @@ import MyOrder from './src/screens/MyOrder';
 import DetailMyOrder from './src/screens/DetailMyOrder';
 import EditProduct from './src/screens/EditProduct';
 import Intro from './src/screens/Intro';
+import DetailNotif from './src/screens/DetailNotif';
 
 const toastConfig = {
   success: ({text1, props}) => (
@@ -163,6 +164,11 @@ function App() {
               options={{title: 'Detail Pesanan'}}
               name="DetailMyOrder"
               component={DetailMyOrder}
+            />
+            <Stack.Screen
+              options={{title: 'Detail Notification'}}
+              name="DetailNotif"
+              component={DetailNotif}
             />
           </Stack.Navigator>
         </NavigationContainer>

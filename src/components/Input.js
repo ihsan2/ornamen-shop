@@ -14,6 +14,7 @@ const Input = ({
   isPassword,
   isSearch,
   withoutMB,
+  autoCapitalize = 'sentences',
 }) => {
   const [show, setShow] = useState(isPassword ? true : false);
 
@@ -43,6 +44,7 @@ const Input = ({
           value={value}
           onChangeText={onChange}
           secureTextEntry={show}
+          autoCapitalize={autoCapitalize}
         />
         {isPassword ? (
           <TouchableOpacity onPress={() => setShow(!show)}>

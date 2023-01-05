@@ -31,13 +31,23 @@ const Notification = ({navigation}) => {
     setLoading(true);
     firestore()
       .collection('Notifications')
+      .where('email', '==', user?.email)
       .get()
       .then(snapshot => {
         snapshot.forEach(doc => {
           arr.push({...doc.data(), id: doc.id});
         });
-        setList(arr);
-        setLoading(false);
+        firestore()
+          .collection('Notifications')
+          .where('email_seller', '==', user?.email)
+          .get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              arr.push({...doc.data(), id: doc.id});
+            });
+            setList(arr);
+            setLoading(false);
+          });
       });
   };
 
@@ -45,14 +55,18 @@ const Notification = ({navigation}) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          user?.email == item?.detail?.email
-            ? navigation.navigate('DetailMyProduct', {item: item?.detail})
-            : navigation.navigate('DetailProduct', {item: item?.detail});
+          if (item?.type == 'order') {
+            navigation.navigate('DetailNotif', {item: item});
+          } else {
+            user?.email == item?.detail?.email
+              ? navigation.navigate('DetailMyProduct', {item: item?.detail})
+              : navigation.navigate('DetailProduct', {item: item?.detail});
+          }
         }}
         style={[styles.listItem]}
         key={key}>
         <Label bold size={13} color={'#bbb'} mb={2}>
-          Produk
+          {item?.type === 'order' ? 'Pesanan' : 'Produk'}
         </Label>
         <Label bold size={14} color={'#113764'} mb={4}>
           {item?.title}
@@ -60,9 +74,22 @@ const Notification = ({navigation}) => {
         <Label size={13} color={'#aaa'} mb={10}>
           {item?.body}
         </Label>
-        <Label bold size={12} color={'#bbb'}>
-          {moment(item?.created_at).format('DD MMMM YYYY HH:mm')}
-        </Label>
+
+        {item?.type == 'order' ? (
+          <View>
+            <Label bold color={'#bbb'}>
+              Estimasi:
+            </Label>
+            <Label bold size={12} color={'#000'}>
+              {moment(item?.created_at).format('DD MMMM YYYY')} -{' '}
+              {moment(item?.estimated).format('DD MMMM YYYY')} (2 Hari)
+            </Label>
+          </View>
+        ) : (
+          <Label bold size={12} color={'#bbb'}>
+            {moment(item?.created_at).format('DD MMMM YYYY HH:mm')}
+          </Label>
+        )}
       </TouchableOpacity>
     );
   };

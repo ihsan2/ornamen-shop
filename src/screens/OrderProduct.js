@@ -22,6 +22,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import {formatRupiah} from '../config/format';
 import {Picker} from '@react-native-picker/picker';
+import moment from 'moment';
 
 const areas = [
   {
@@ -97,9 +98,9 @@ const OrderProduct = ({navigation, route}) => {
   const dispatch = useDispatch();
 
   const _doAdd = async () => {
-    let validated = tipe == '1' ? address : address || !address;
+    let validated = true;
     if (validated) {
-      // setLoading(true);
+      setLoading(true);
 
       let areaSelected = areas.filter(e => e.value === area)[0];
       let data = {
@@ -109,7 +110,7 @@ const OrderProduct = ({navigation, route}) => {
         phone: user?.phone,
         stok: stok,
         tipe: tipe == '1' ? 'antar' : 'ambil_sendiri',
-        alamat_pengantaran: tipe == '1' ? address : '',
+        alamat_pengantaran: tipe == '1' ? user?.address : '',
         area_pengantaran: tipe == '1' ? areaSelected?.value : '',
         ongkir: tipe == '1' ? areaSelected?.label.toString() : '',
         status: '0',
@@ -122,6 +123,39 @@ const OrderProduct = ({navigation, route}) => {
         .then(res => {
           setLoading(false);
           showToast({text1: 'Berhasil Buat Pesanan!'});
+
+          let dataNotif = {
+            detail: item,
+            email: user?.email,
+            name: user?.name,
+            phone: user?.phone,
+            stok: stok,
+            tipe: tipe == '1' ? 'antar' : 'ambil_sendiri',
+            alamat_pengantaran: tipe == '1' ? user?.address : '',
+            area_pengantaran: tipe == '1' ? areaSelected?.value : '',
+            ongkir: tipe == '1' ? areaSelected?.label.toString() : '',
+            status: '0',
+            email_seller: item?.email,
+            created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
+            body: `Pemberitahian pesanan baru. Lihat detail pesanana Anda`,
+            title: `${item?.name} - ${item?.storeName}`,
+            estimated: moment().add(2, 'days').format('YYYY-MM-DD HH:mm:ss'),
+            type: 'order',
+          };
+          firestore()
+            .collection('Notifications')
+            .add(dataNotif)
+            .then(resp => {
+              firestore()
+                .collection('Orders')
+                .doc(res?.id)
+                .update({id_order: res.id, id_notif: resp.id});
+              firestore()
+                .collection('Notifications')
+                .doc(resp?.id)
+                .update({id_order: res.id, id_notif: resp.id});
+            });
+
           navigation.navigate('Home');
         });
     } else {
@@ -217,12 +251,12 @@ const OrderProduct = ({navigation, route}) => {
                 </Picker>
               </View>
             </View>
-            <Input
+            {/* <Input
               placeholder={'Alamat Pengantaran'}
               label={'Alamat Pengataran'}
               value={address}
               onChange={v => setAddress(v)}
-            />
+            /> */}
           </View>
         )}
 

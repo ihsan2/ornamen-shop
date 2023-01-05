@@ -39,6 +39,7 @@ const ProofTransfer = ({navigation, route}) => {
     if (name && bank && rek && images) {
       setLoading(true);
       let nowName = Date.now();
+
       await storage().ref(`images/${nowName}-${name}.jpg`).putFile(images);
       let url = await storage()
         .ref(`images/${nowName}-${name}.jpg`)
@@ -55,12 +56,18 @@ const ProofTransfer = ({navigation, route}) => {
       };
       firestore()
         .collection('Orders')
-        .doc(item?.id)
+        .doc(item?.id_order)
         .update(data)
         .then(res => {
-          setLoading(false);
-          showToast({text1: 'Berhasil kirim bukti transfer!'});
-          navigation.goBack();
+          firestore()
+            .collection('Notifications')
+            .doc(item?.id_notif)
+            .update(data)
+            .then(res => {
+              setLoading(false);
+              showToast({text1: 'Berhasil kirim bukti transfer!'});
+              navigation.navigate('Order');
+            });
         });
     } else {
       showToast({type: 'error', text1: 'All Form must be filled.'});
@@ -105,6 +112,16 @@ const ProofTransfer = ({navigation, route}) => {
                 Number(item?.ongkir),
             )}
           </Label>
+          {item?.status == '1' && (
+            <View>
+              <Label mt={12} size={15} color={'black'}>
+                Status:
+              </Label>
+              <Label bold mt={0} size={15} color={primary_green}>
+                Transfer
+              </Label>
+            </View>
+          )}
 
           <Label mt={12} size={15} color={'black'} mr={8}>
             Rekening Tujuan:
@@ -133,57 +150,60 @@ const ProofTransfer = ({navigation, route}) => {
           </View>
         </View>
 
-        <Input
-          placeholder={'Nama Pengirim'}
-          label={'Nama Pengirim'}
-          value={name}
-          onChange={v => setName(v)}
-        />
-        <Input
-          placeholder={'Nomor Rekening Pengirim'}
-          label={'Nomor Rekening Pengirim'}
-          value={rek}
-          onChange={v => setRek(v)}
-        />
-        <View>
-          <Label mb={8} color={'#868686'}>
-            Pilih Bank Pengirim
-          </Label>
-          <View style={styles.picker}>
-            <Picker
-              selectedValue={bank}
-              onValueChange={(itemValue, itemIndex) => setBank(itemValue)}>
-              <Picker.Item
-                color="grey"
-                label="-- Pilih Bank Pengirim --"
-                value=""
-              />
-              <Picker.Item label="BRI" value="BRI" />
-              <Picker.Item label="BNI" value="BNI" />
-              <Picker.Item label="BCA" value="BCA" />
-              <Picker.Item label="MANDIRI" value="MANDIRI" />
-            </Picker>
-          </View>
-        </View>
-        {/* <Input
+        {item?.status == '0' && (
+          <View>
+            <Input
+              placeholder={'Nama Pengirim'}
+              label={'Nama Pengirim'}
+              value={name}
+              onChange={v => setName(v)}
+            />
+            <Input
+              placeholder={'Nomor Rekening Pengirim'}
+              label={'Nomor Rekening Pengirim'}
+              value={rek}
+              onChange={v => setRek(v)}
+            />
+            <View>
+              <Label mb={8} color={'#868686'}>
+                Pilih Bank Pengirim
+              </Label>
+              <View style={styles.picker}>
+                <Picker
+                  selectedValue={bank}
+                  onValueChange={(itemValue, itemIndex) => setBank(itemValue)}>
+                  <Picker.Item
+                    color="grey"
+                    label="-- Pilih Bank Pengirim --"
+                    value=""
+                  />
+                  <Picker.Item label="BRI" value="BRI" />
+                  <Picker.Item label="BNI" value="BNI" />
+                  <Picker.Item label="BCA" value="BCA" />
+                  <Picker.Item label="MANDIRI" value="MANDIRI" />
+                </Picker>
+              </View>
+            </View>
+            {/* <Input
           placeholder={'Bank'}
           label={'Bank'}
           value={bank}
           onChange={v => setBank(v)}
         /> */}
 
-        <Label mb={8} color={'#868686'}>
-          Screenshot Bukti Pengirim
-        </Label>
-        <TouchableOpacity style={styles.addPhoto} onPress={() => pick()}>
-          {images ? (
-            <Image source={{uri: images}} style={styles.images} />
-          ) : (
-            <Icon name="add" size={30} color={'#bbb'} />
-          )}
-        </TouchableOpacity>
-
-        <Button label={'Kirim Bukti Transfer'} onPress={() => _doSend()} />
+            <Label mb={8} color={'#868686'}>
+              Screenshot Bukti Pengirim
+            </Label>
+            <TouchableOpacity style={styles.addPhoto} onPress={() => pick()}>
+              {images ? (
+                <Image source={{uri: images}} style={styles.images} />
+              ) : (
+                <Icon name="add" size={30} color={'#bbb'} />
+              )}
+            </TouchableOpacity>
+            <Button label={'Kirim Bukti Transfer'} onPress={() => _doSend()} />
+          </View>
+        )}
       </View>
     </ScrollView>
   );

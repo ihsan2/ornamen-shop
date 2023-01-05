@@ -98,19 +98,6 @@ const Home = ({navigation}) => {
   }, []);
 
   const generateLink = async () => {
-    const link = await dynamicLinks().buildShortLink(
-      {
-        link: 'https://ornamen.page.link/qL6j?code=2727',
-        domainUriPrefix: 'https://ornamen.page.link',
-        android: {
-          packageName: 'com.ornamen',
-          minimumVersion: '1',
-        },
-      },
-      dynamicLinks.ShortLinkType.DEFAULT,
-    );
-    Clipboard.setString(link);
-    console.log('link >', link);
   };
 
   const handleDynamicLink = link => {

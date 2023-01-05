@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -17,6 +17,7 @@ import {primary_green} from '../config/color';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {setUserInfo} from '../redux/actions/userActions';
+import {useIsFocused} from '@react-navigation/native';
 
 const Login = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -24,24 +25,58 @@ const Login = ({navigation}) => {
   const user = useSelector(state => state.user);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const [users, setUsers] = useState([]);
+  const focus = useIsFocused();
+
+  useEffect(() => {
+    getData();
+  }, [focus]);
+
+  const getData = async () => {
+    let arr = [];
+    firestore()
+      .collection('Users')
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(doc => {
+          arr.push({...doc.data(), id: doc.id});
+        });
+        setUsers(arr);
+      });
+  };
 
   const _doLogin = () => {
     if (email && password) {
-      setLoading(true);
-      auth()
-        .signInWithEmailAndPassword(email.trim(), password)
-        .then(async res => {
-          let uid = res?.user?.uid;
-          const user = await firestore().collection('Users').doc(uid).get();
-          showToast({text1: 'Berhasil Login.'});
-          setLoading(false);
-          dispatch(setUserInfo(user.data()));
-          navigation.replace('Splash');
-        })
-        .catch(error => {
-          setLoading(false);
-          showToast({type: 'error', text1: error.code});
-        });
+      if (
+        users.filter(
+          e =>
+            e?.email.toLowerCase() === email.toLowerCase() ||
+            e?.username === email,
+        ).length === 0
+      ) {
+        showToast({type: 'error', text1: 'User sudah terdaftar.'});
+      } else {
+        let detail = users.filter(
+          e =>
+            e?.email.toLowerCase() === email.toLowerCase() ||
+            e?.username === email,
+        )[0];
+        setLoading(true);
+        auth()
+          .signInWithEmailAndPassword(detail?.email, password)
+          .then(async res => {
+            let uid = res?.user?.uid;
+            const user = await firestore().collection('Users').doc(uid).get();
+            showToast({text1: 'Berhasil Login.'});
+            setLoading(false);
+            dispatch(setUserInfo(user.data()));
+            navigation.replace('Splash');
+          })
+          .catch(error => {
+            setLoading(false);
+            showToast({type: 'error', text1: error.code});
+          });
+      }
     } else {
       showToast({
         type: 'error',
@@ -61,10 +96,11 @@ const Login = ({navigation}) => {
         </Label>
 
         <Input
-          placeholder={'Your Email'}
-          label={'Email'}
+          placeholder={'Your Email / Username'}
+          label={'Email / Username'}
           value={email}
           onChange={v => setEmail(v)}
+          autoCapitalize={'none'}
         />
         <Input
           placeholder={'Your Password'}

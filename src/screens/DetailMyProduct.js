@@ -76,6 +76,7 @@ const DetailMyProduct = ({navigation, route}) => {
       created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
       body: `Ada pemberitahuan produk ${item?.name} dari ${item?.storeName}, sisa stok ${item?.stok}. Buruan dicek produknya sebelum kehabisan.`,
       title: `${item?.name} - ${item?.storeName}`,
+      type: 'product',
     };
     firestore()
       .collection('Notifications')
